@@ -1,0 +1,40 @@
+import java.io.BufferedReader; import java.io.InputStreamReader; import java.net.HttpURLConnection; import java.net.URL; import java.util.Scanner; import org.json.JSONObject;
+
+public class RealTimeCurrencyConverter { public static void main(String[] args) { Scanner scanner = new Scanner(System.in);
+
+    System.out.print("Enter base currency (e.g., USD): ");
+    String base = scanner.next().toUpperCase();
+
+    System.out.print("Enter target currency (e.g., INR): ");
+    String target = scanner.next().toUpperCase();
+
+    System.out.print("Enter amount: ");
+    double amount = scanner.nextDouble();
+
+    try {
+        String urlStr = "https://api.exchangerate.host/latest?base=" + base + "&symbols=" + target;
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(conn.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+
+        while ((inputLine = in.readLine()) != null)
+            response.append(inputLine);
+        in.close();
+
+        JSONObject obj = new JSONObject(response.toString());
+        double rate = obj.getJSONObject("rates").getDouble(target);
+
+        double converted = amount * rate;
+
+        System.out.printf("Converted Amount: %.2f %s\n", converted, target);
+
+    } catch (Exception e) {
+        System.out.println("Error fetching exchange rate: " + e.getMessage());
+    }
+}
+}
